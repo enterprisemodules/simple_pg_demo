@@ -1,0 +1,22 @@
+profile::base::hosts::list:
+  pgmaster.example.com:
+    ip: 192.168.253.10
+    host_aliases:
+      - dbmaster
+      - puppet
+  pg10.example.com:
+    ip: 192.168.253.112
+    host_aliases:
+      - pg10
+  pg11.example.com:
+    ip: 192.168.253.121
+    host_aliases:
+      - pg11
+  pg12.example.com:
+    ip: 192.168.253.122
+    host_aliases:
+      - pg12
+  pg13.example.com:
+    ip: 192.168.253.180
+    host_aliases:
+      - pg13

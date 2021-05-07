@@ -1,0 +1,71 @@
+---
+#
+# The default settings for all nodes
+#
+defaults:
+  domain_name:     example.com
+  cpucount:         1
+  needs_storage:    false
+  additional_hosts:
+    pgmaster:
+      ip: 192.168.253.10
+  box:              enterprisemodules/ol-7.7-x86_64-nocm
+  dhcp_fix:         false
+  virtualboxorafix: true
+  custom_facts:
+    deployment_zone: vagrant
+
+#
+# The default settings for all ML nodes
+#
+ml-defaults:
+  type:             masterless
+
+#
+# The default settings for all PE nodes
+#
+pe-defaults:
+  type:             pe-agent
+  puppet_master:    pgmaster
+
+#
+# The settings for the Puppet Enterprise Server
+#
+pe-pgmaster:
+  public_ip:        192.168.253.10
+  cpucount:         2
+  ram:              3072
+  type:             pe-master
+  virtualboxorafix: false
+  puppet_installer: puppet-enterprise-2021.0.0-el-7-x86_64/puppet-enterprise-installer
+
+#
+# All masterless nodes
+#
+ml-pg10:
+  public_ip:        '192.168.253.112'
+
+ml-pg11:
+  public_ip:        '192.168.253.121'
+
+ml-pg12:
+  public_ip:        '192.168.253.122'
+
+ml-pg13:
+  public_ip:        '192.168.253.180'
+
+#
+# All Puppet Agent nodes
+#
+pe-pg10:
+  public_ip:        '192.168.253.112'
+
+pe-pg11:
+  public_ip:        '192.168.253.121'
+
+pe-pg12:
+  public_ip:        '192.168.253.122'
+
+pe-pg13:
+  public_ip:        '192.168.253.180'
+

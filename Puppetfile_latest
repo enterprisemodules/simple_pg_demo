@@ -1,0 +1,33 @@
+mod 'puppetlabs-stdlib'
+mod 'puppetlabs-pwshlib'
+mod 'puppetlabs-concat'
+mod 'stm-debconf'
+mod 'saz-limits'
+mod 'petems-swap_file'
+mod 'puppet-archive'
+mod 'saz-timezone'
+mod 'ipcrm-echo'
+mod 'herculesteam-augeasproviders_core'
+mod 'herculesteam-augeasproviders_grub'
+mod 'herculesteam-augeasproviders_sysctl'
+mod 'puppetlabs-firewall'
+mod 'puppet-firewalld'
+#
+# Needed for Windows support
+#
+mod 'puppetlabs-chocolatey'
+mod 'puppetlabs-powershell'
+mod 'puppetlabs-registry'
+#
+# The Enterprise Modules Postgres specific Modules
+#
+mod 'enterprisemodules-easy_type',   git: 'https://gitlab.com/enterprisemodules/easy_type_src.git' 
+mod 'enterprisemodules-pg_config',   git: 'https://gitlab.com/enterprisemodules/pg_config.git'
+mod 'enterprisemodules-pg_profile',  git: 'https://gitlab.com/enterprisemodules/pg_profile.git'
+#mod 'enterprisemodules-pg_secured', git: 'https://gitlab.com/enterprisemodules/pg_secured.git'
+#
+# Modules that are part of the control repo. R10K doesn't need to touch these
+#
+mod 'role',                                 :local => true
+mod 'profile',                              :local => true
+mod 'em_license',                           :local => true

@@ -1,0 +1,52 @@
+---
+deployment_zone: vagrant
+
+role: role::postgres::simple_db
+
+pg_profile::version:    '12'
+
+pg_profile::database::db_software::install_contrib:     true
+pg_profile::database::db_software::install_devel:       false
+pg_profile::database::db_software::install_docs:        true
+pg_profile::database::db_software::install_llvmjit:     true
+pg_profile::database::db_software::install_odbc:        true
+pg_profile::database::db_software::install_plperl:      true
+pg_profile::database::db_software::install_plpython3:   true
+pg_profile::database::db_software::install_pltcl:       true
+pg_profile::database::db_software::install_test:        false
+
+
+pg_profile::database::before_db_tablespaces:    profile::create_tablespace_dir
+
+pg_profile::database::db_roles::list:
+  my_role_1@localhost: 
+    ensure:   present
+    password: secretstuff
+    login:    true
+  my_role_2@localhost: 
+    ensure: present
+    create_db:  true
+
+pg_profile::database::db_definition::list:
+  my_db_1@localhost: 
+    ensure:   present
+    owner:    my_role_2
+  my_db_2@localhost: 
+    ensure:   present
+
+pg_profile::database::db_parameters::list:
+  log_connections@localhost:
+    value:  'on'
+pg_profile::database::db_parameters::list:
+  log_disconnections@localhost:
+    value:  'on'
+
+pg_profile::database::db_tablespaces::list:
+  my_ts_1@localhost:
+    ensure:   present
+    location: /u01/tablespaces
+    owner:    my_role_2
+  my_ts_2@localhost:
+    ensure:   present
+    # owner:    my_role_2
+    location: /u02/tablespaces

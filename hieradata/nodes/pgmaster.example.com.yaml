@@ -1,0 +1,4 @@
+---
+deployment_zone: vagrant
+
+role: 'role::puppet_master'

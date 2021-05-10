@@ -1,5 +1,5 @@
 # Docs
-class role::postgres::secure_db()
+class role::postgres::secured_db()
 {
 
   contain ::profile::base

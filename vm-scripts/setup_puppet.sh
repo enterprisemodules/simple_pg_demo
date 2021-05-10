@@ -29,7 +29,7 @@ else
     echo "Using released versions of modules..."
     PUPPETFILE="Puppetfile"
   fi
-  # /opt/puppetlabs/puppet/bin/r10k puppetfile install --puppetfile ${PUPPETFILE} --force > /dev/null # 2>&1
+  /opt/puppetlabs/puppet/bin/r10k puppetfile install --puppetfile ${PUPPETFILE} --force > /dev/null # 2>&1
 
   #
   # Setup hiera search and backend. We need this to config our systems

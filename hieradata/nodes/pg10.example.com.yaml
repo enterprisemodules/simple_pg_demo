@@ -7,14 +7,11 @@ role: role::postgres::secured_db
 pg_profile::version:    '10'
 
 pg_profile::database::cis_controls::dbname:             localhost
-pg_profile::database::cis_controls::product_version:    pg13
+pg_profile::database::cis_controls::product_version:    pg10
 pg_profile::database::cis_controls::doc_version:        'V1.0.0'
 pg_profile::database::cis_controls::skip_list:
-- data_cluster_initialized_successfully
-- log_destinations_are_set_correctly
-- postgresql_audit_extension_pgaudit_is_enabled
-- backend_runtime_parameters_are_configured_correctly
-
+  - fips_140_2_openssl_cryptography_is_used
+  - excessive_dml_privileges_are_revoked
 
 pg_profile::database::db_software::install_contrib:     true
 pg_profile::database::db_software::install_devel:       false
@@ -45,12 +42,12 @@ pg_profile::database::db_definition::list:
   my_db_2@localhost: 
     ensure:   present
 
-# pg_profile::database::db_parameters::list:
-#   log_connections@localhost:
-#     value:  'on'
-# pg_profile::database::db_parameters::list:
-#   log_disconnections@localhost:
-#     value:  'on'
+pg_profile::database::db_parameters::list:
+  log_connections@localhost:
+    value:  'on'
+pg_profile::database::db_parameters::list:
+  log_disconnections@localhost:
+    value:  'on'
 
 pg_profile::database::db_tablespaces::list:
   my_ts_1@localhost:

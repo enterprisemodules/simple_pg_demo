@@ -74,3 +74,5 @@ windows_hosts_file.pp
 /modules/pg_config
 /modules/pg_profile
 /modules/pg_secured
+/modules/augeasproviders_postgresql/
+/modules/epel/

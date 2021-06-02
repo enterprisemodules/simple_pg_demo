@@ -5,9 +5,12 @@ mod 'petems-swap_file'
 mod 'saz-timezone'
 mod 'ipcrm-echo'
 mod 'herculesteam-augeasproviders_core'
-mod 'herculesteam-augeasproviders_sysctl'
+mod 'herculesteam-augeasproviders_postgresql'
 mod 'puppetlabs-firewall'
 mod 'puppet-firewalld'
+mod 'puppet-epel'
+mod 'puppet-archive'
+
 #
 # The Enterprise Modules Postgres specific Modules
 #

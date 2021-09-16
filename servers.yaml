@@ -32,7 +32,7 @@ pe-defaults:
 # The settings for the Puppet Enterprise Server
 #
 pe-pgmaster:
-  public_ip:        192.168.253.10
+  public_ip:        192.168.253.9
   cpucount:         2
   ram:              3072
   type:             pe-master
@@ -43,29 +43,34 @@ pe-pgmaster:
 # All masterless nodes
 #
 ml-pg10:
-  public_ip:        '192.168.253.112'
+  public_ip:        '192.168.253.10'
 
 ml-pg11:
-  public_ip:        '192.168.253.121'
+  public_ip:        '192.168.253.11'
 
 ml-pg12:
-  public_ip:        '192.168.253.122'
+  public_ip:        '192.168.253.12'
 
 ml-pg13:
-  public_ip:        '192.168.253.180'
+  public_ip:        '192.168.253.13'
+
+ml-pg14:
+  public_ip:        '192.168.253.14'
 
 #
 # All Puppet Agent nodes
 #
 pe-pg10:
-  public_ip:        '192.168.253.112'
+  public_ip:        '192.168.253.10'
 
 pe-pg11:
-  public_ip:        '192.168.253.121'
+  public_ip:        '192.168.253.11'
 
 pe-pg12:
-  public_ip:        '192.168.253.122'
+  public_ip:        '192.168.253.12'
 
 pe-pg13:
-  public_ip:        '192.168.253.180'
+  public_ip:        '192.168.253.13'
 
+pe-pg14:
+  public_ip:        '192.168.253.14'

@@ -1,0 +1,66 @@
+---
+deployment_zone: vagrant
+
+role: role::postgres::simple_db
+
+# role: role::postgres::simple_db
+role: role::postgres::secured_db
+
+pg_profile::version:      '14'
+pg_profile::database::db_software::base_url:          "https://download.postgresql.org/pub/repos/yum/testing/%{lookup('pg_profile::version')}/redhat/rhel-$releasever-$basearch"
+
+pg_profile::database::cis_controls::dbname:             localhost
+pg_profile::database::cis_controls::product_version:    pg13
+pg_profile::database::cis_controls::doc_version:        'V1.0.0'
+pg_profile::database::cis_controls::skip_list:
+  - wal_archiving_is_configured_and_functional
+  - fips_140_2_openssl_cryptography_is_used
+  - backup_and_restore_tool_pgbackrest_is_installed_and_configured
+  - postgresql_audit_extension_pgaudit_is_enabled       # Not yet available for beta
+  - set_user_extension_is_installed                     # Not yet available for beta
+
+pg_profile::database::db_software::install_contrib:     true
+pg_profile::database::db_software::install_devel:       false
+pg_profile::database::db_software::install_docs:        true
+# pg_profile::database::db_software::install_llvmjit:     true
+# pg_profile::database::db_software::install_odbc:        true
+pg_profile::database::db_software::install_plperl:      true
+pg_profile::database::db_software::install_plpython3:   true
+pg_profile::database::db_software::install_pltcl:       true
+pg_profile::database::db_software::install_test:        false
+
+
+pg_profile::database::before_db_tablespaces:    profile::create_tablespace_dir
+
+pg_profile::database::db_roles::list:
+  my_role_1@localhost: 
+    ensure:   present
+    password: secretstuff
+    login:    true
+  my_role_2@localhost: 
+    ensure: present
+    create_db:  true
+
+pg_profile::database::db_definition::list:
+  my_db_1@localhost: 
+    ensure:   present
+    owner:    my_role_2
+  my_db_2@localhost: 
+    ensure:   present
+
+pg_profile::database::db_parameters::list:
+  log_connections@localhost:
+    value:  'on'
+pg_profile::database::db_parameters::list:
+  log_disconnections@localhost:
+    value:  'on'
+
+pg_profile::database::db_tablespaces::list:
+  my_ts_1@localhost:
+    ensure:   present
+    location: /u01/tablespaces
+    owner:    my_role_2
+  my_ts_2@localhost:
+    ensure:   present
+    # owner:    my_role_2
+    location: /u02/tablespaces

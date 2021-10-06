@@ -7,7 +7,6 @@ role: role::postgres::simple_db
 role: role::postgres::secured_db
 
 pg_profile::version:      '14'
-pg_profile::database::db_software::base_url:          "https://download.postgresql.org/pub/repos/yum/testing/%{lookup('pg_profile::version')}/redhat/rhel-$releasever-$basearch"
 
 pg_profile::database::cis_controls::dbname:             localhost
 pg_profile::database::cis_controls::product_version:    pg13

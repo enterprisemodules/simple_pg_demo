@@ -9,7 +9,7 @@ defaults:
   additional_hosts:
     pgmaster:
       ip: 192.168.253.10
-  box:              enterprisemodules/centos-8.1-x86_64-nocm
+  box:              enterprisemodules/ol-8.1-x86_64-nocm
   dhcp_fix:         false
   virtualboxorafix: true
   custom_facts:

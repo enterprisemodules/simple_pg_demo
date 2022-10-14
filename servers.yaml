@@ -57,6 +57,9 @@ ml-pg13:
 ml-pg14:
   public_ip:        '192.168.253.14'
 
+ml-pg15:
+  public_ip:        '192.168.253.15'
+
 #
 # All Puppet Agent nodes
 #
@@ -74,3 +77,6 @@ pe-pg13:
 
 pe-pg14:
   public_ip:        '192.168.253.14'
+
+pe-pg15:
+  public_ip:        '192.168.253.15'

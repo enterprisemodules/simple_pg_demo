@@ -43,9 +43,6 @@ pg_profile::database::db_definition::list:
     ensure:   present
 
 pg_profile::database::db_parameters::list:
-  log_connections@localhost:
-    value:  'on'
-pg_profile::database::db_parameters::list:
   log_disconnections@localhost:
     value:  'on'
 

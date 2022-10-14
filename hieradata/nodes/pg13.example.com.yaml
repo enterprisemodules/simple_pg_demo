@@ -1,8 +1,6 @@
 ---
 deployment_zone: vagrant
 
-role: role::postgres::simple_db
-
 # role: role::postgres::simple_db
 role: role::postgres::secured_db
 

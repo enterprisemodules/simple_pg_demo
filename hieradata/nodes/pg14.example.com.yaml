@@ -1,8 +1,6 @@
 ---
 deployment_zone: vagrant
 
-role: role::postgres::simple_db
-
 # role: role::postgres::simple_db
 role: role::postgres::secured_db
 
@@ -46,9 +44,6 @@ pg_profile::database::db_definition::list:
   my_db_2@localhost: 
     ensure:   present
 
-pg_profile::database::db_parameters::list:
-  log_connections@localhost:
-    value:  'on'
 pg_profile::database::db_parameters::list:
   log_disconnections@localhost:
     value:  'on'

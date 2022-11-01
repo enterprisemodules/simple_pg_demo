@@ -10,8 +10,17 @@ The name of the node indicates which version of Postgre will be installed in it 
 All nodes are available to test with Puppet masterless. To do so, add `ml-` for the name when using vagrant:
 
 ```
-$ vagrant up <ml-pg10|ml-pg11|ml-pg12|ml-pg13|ml-pg14>
+$ vagrant up <ml-pg10|ml-pg11|ml-pg12|ml-pg13|ml-pg14|ml-pg15>
 ```
+
+## A multi-version, multi-instance example
+
+The latest versions of the modules also support installing multiple versions and multiple instances per node. To run that example use:
+
+```
+$ vagrant up ml-multi
+```
+
 
 ## Starting the nodes with PE
 
@@ -19,7 +28,7 @@ You can also test with a Puppet Enterprise server. To do so, add `pe-` for the n
 
 ```
 $ vagrant up pe-pgmaster
-$ vagrant up <pe-pg10|pe-pg11|pe-pg12|pe-pg13|pe-pg14>
+$ vagrant up <pe-pg10|pe-pg11|pe-pg12|pe-pg13|pe-pg14|pe-pg15>
 ```
 
 ## ordering
@@ -27,5 +36,5 @@ $ vagrant up <pe-pg10|pe-pg11|pe-pg12|pe-pg13|pe-pg14>
 You must always use the specified order:
 
 1. pgmaster
-2. <pe-pg10|pe-pg11|pe-pg12|pe-pg13|pe-pg14>
+2. <pe-pg10|pe-pg11|pe-pg12|pe-pg13|pe-pg14"pe-pg15>
 

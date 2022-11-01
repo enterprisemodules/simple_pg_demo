@@ -1,0 +1,144 @@
+---
+deployment_zone: vagrant
+
+role: role::postgres::simple_db
+role: role::postgres::secured_db
+
+
+pg_profile::version:      ['13', '14']
+
+pg_profile::database::cis_controls::instance:                           db14
+pg_profile::database::cis_controls::product_version:                    pg14
+pg_profile::database::cis_controls::doc_version:                        'V1.0.0'
+pg_secured::controls::systemd_service_files_are_enabled::service_name:  'postgresql-14-db14'
+pg_profile::database::cis_controls::skip_list:
+  - wal_archiving_is_configured_and_functional
+  - fips_130_2_openssl_cryptography_is_used
+  - backup_and_restore_tool_pgbackrest_is_installed_and_configured
+  - tls_is_enabled_and_configured_correctly
+
+pg_profile::database::db_software::install_contrib:     true
+pg_profile::database::db_software::install_devel:       false
+pg_profile::database::db_software::install_docs:        true
+pg_profile::database::db_software::install_llvmjit:     true
+pg_profile::database::db_software::install_odbc:        true
+pg_profile::database::db_software::install_plperl:      true
+pg_profile::database::db_software::install_plpython3:   true
+pg_profile::database::db_software::install_pltcl:       true
+pg_profile::database::db_software::install_test:        false
+
+pg_profile::database::groups_and_users::users:
+  postgres13:
+    ensure:     present
+    comment:    PostgreSQL Server
+    gid:        26
+    home:       /home/postgres13
+    managehome: true
+    shell:      /bin/bash
+    uid:        26
+
+pg_profile::database::groups_and_users::groups:
+  postgres13:
+    ensure: present
+    gid:    26
+
+pg_profile::database::db_clusters::dirs:
+  /home/postgres13/logs:
+    ensure: directory
+    owner:  "postgres13"
+    group:  "postgres13"
+  /var/lib/pgsql/logs:
+    ensure: directory
+    owner:  "postgres"
+    group:  "postgres"
+
+pg_profile::database::db_clusters::list:
+  /home/postgres13/data:
+    ensure:   present
+    os_user:  postgres13
+    os_group: postgres13
+    location: /usr/pgsql-13
+    waldir:   /home/postgres13/logs
+  /var/lib/pgsql/data:
+    ensure:   present
+    os_user:  postgres
+    os_group: postgres
+    location: /usr/pgsql-14
+    waldir:   "/var/lib/pgsql/logs"
+#
+# Instances
+#
+pg_profile::database::db_instances::defaults:
+    os_user:    "%{lookup('pg_profile::os_user')}"
+    os_group:   "%{lookup('pg_profile::os_group')}"
+    location:   "/usr/pgsql-%{lookup('pg_profile::version')}"
+    autostart:  true
+    ensure:     present
+    status:     running
+#
+pg_profile::database::db_instances::list:
+  db13:
+    os_user:    postgres13
+    os_group:   postgres13
+    location:   /usr/pgsql-13
+    cluster:    /home/postgres13/data
+    version:    '13'
+    port:       5432
+  db14:
+    os_user:    postgres
+    os_group:   postgres
+    location:   /usr/pgsql-14
+    cluster:    /var/lib/pgsql/data
+    version:    '14'
+    port:       5433
+
+pg_profile::database::before_db_tablespaces:    profile::create_tablespace_dir
+
+pg_profile::database::db_roles::list:
+  # my_role_1@db13: 
+  #   ensure:   present
+  #   password: secretstuff
+  #   login:    true
+  my_role_2@db13: 
+    ensure: present
+    create_db:  true
+  my_role_2@db14: 
+    ensure: present
+    create_db:  true
+
+pg_profile::database::db_definition::list:
+  my_db_1@db13: 
+    ensure:   present
+    owner:    my_role_2
+  my_db_2@db14: 
+    ensure:   present
+
+pg_profile::database::db_parameters::list:
+  log_connections@db13:
+    value:  'on'
+  log_connections@db14:
+    value:  'on'
+
+pg_profile::database::db_tablespaces::list:
+  my_ts_1@db13:
+    ensure:   present
+    location: /u01/tablespaces
+    owner:    my_role_2
+  my_ts_2@db13:
+    ensure:   present
+    # owner:    my_role_2
+    location: /u02/tablespaces
+  my_ts_1@db14:
+    ensure:   present
+    location: /u01/tablespaces
+    owner:    my_role_2
+  my_ts_2@db14:
+    ensure:   present
+    # owner:    my_role_2
+    location: /u02/tablespaces
+
+pg_profile::database::firewall::firewalld::ports:
+  "500 accept tcp port 5432 for Postgres":
+    port: 5432
+  "501 accept tcp port 5433 for Postgres":
+    port: 5433

@@ -6,7 +6,7 @@ role: role::postgres::secured_db
 
 pg_profile::version:    '10'
 
-pg_profile::database::cis_controls::dbname:             localhost
+pg_profile::database::cis_controls::instance:             default
 pg_profile::database::cis_controls::product_version:    pg10
 pg_profile::database::cis_controls::doc_version:        'V1.0.0'
 pg_profile::database::cis_controls::skip_list:
@@ -27,31 +27,31 @@ pg_profile::database::db_software::install_test:        false
 pg_profile::database::before_db_tablespaces:    profile::create_tablespace_dir
 
 pg_profile::database::db_roles::list:
-  my_role_1@localhost: 
+  my_role_1@default: 
     ensure:   present
     password: secretstuff
     login:    true
-  my_role_2@localhost: 
+  my_role_2@default: 
     ensure: present
     create_db:  true
 
 pg_profile::database::db_definition::list:
-  my_db_1@localhost: 
+  my_db_1@default: 
     ensure:   present
     owner:    my_role_2
-  my_db_2@localhost: 
+  my_db_2@default: 
     ensure:   present
 
 pg_profile::database::db_parameters::list:
-  log_disconnections@localhost:
+  log_disconnections@default:
     value:  'on'
 
 pg_profile::database::db_tablespaces::list:
-  my_ts_1@localhost:
+  my_ts_1@default:
     ensure:   present
     location: /u01/tablespaces
     owner:    my_role_2
-  my_ts_2@localhost:
+  my_ts_2@default:
     ensure:   present
     # owner:    my_role_2
     location: /u02/tablespaces

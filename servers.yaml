@@ -60,6 +60,10 @@ ml-pg14:
 ml-pg15:
   public_ip:        '192.168.253.15'
 
+ml-pgmulti:
+  public_ip:        '192.168.253.254'
+  ram:              12288
+
 #
 # All Puppet Agent nodes
 #
@@ -80,3 +84,7 @@ pe-pg14:
 
 pe-pg15:
   public_ip:        '192.168.253.15'
+
+pe-pgmulti:
+  public_ip:        '192.168.253.254'
+  ram:              12288

@@ -1,4 +1,10 @@
 profile::base::hosts::list:
+  localhost:
+    ip: 127.0.0.1
+    host_aliases:
+      - localhost.localdomain
+      - localhost6
+      - localhost6.localdomain6
   pgmaster.example.com:
     ip: 192.168.253.9
     host_aliases:

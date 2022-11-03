@@ -9,7 +9,13 @@ defaults:
   additional_hosts:
     pgmaster:
       ip: 192.168.253.10
-  box:              enterprisemodules/ol-8.1-x86_64-nocm
+  #
+  # Chose one of the boxes you like
+  #
+  # box:              enterprisemodules/ol-8.1-x86_64-nocm    # OracleLinux 8.1
+  # box:              enterprisemodules/ol-9.0-x86_64-nocm    # Oracle Linux 9.0
+  # box:              enterprisemodules/al-9.0-x86_64-nocm    # AlmaLinux 9.0
+  box:              enterprisemodules/rl-9.0-x86_64-nocm    # RockyLinux 9.0
   dhcp_fix:         false
   virtualboxorafix: true
   custom_facts:

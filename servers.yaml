@@ -7,7 +7,7 @@ defaults:
   cpucount:         1
   needs_storage:    false
   additional_hosts:
-    pgmaster:
+    pgserver:
       ip: 192.168.253.10
   #
   # Chose one of the boxes you like
@@ -32,18 +32,18 @@ ml-defaults:
 #
 pe-defaults:
   type:             pe-agent
-  puppet_master:    pgmaster
-
+  puppet_master:    pgserver
+  box:              enterprisemodules/ol-8.1-x86_64-nocm    # OracleLinux 8.1
 #
 # The settings for the Puppet Enterprise Server
 #
-pe-pgmaster:
+pe-pgserver:
   public_ip:        192.168.253.9
   cpucount:         2
   ram:              3072
   type:             pe-master
   virtualboxorafix: false
-  puppet_installer: puppet-enterprise-2021.0.0-el-7-x86_64/puppet-enterprise-installer
+  puppet_installer: puppet-enterprise-2021.7.1-el-8-x86_64/puppet-enterprise-installer
 
 #
 # All masterless nodes

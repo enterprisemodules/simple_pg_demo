@@ -10,7 +10,7 @@ The name of the node indicates which version of Postgre will be installed in it 
 All nodes are available to test with Puppet masterless. To do so, add `ml-` for the name when using vagrant:
 
 ```
-$ vagrant up <ml-pg10|ml-pg11|ml-pg12|ml-pg13|ml-pg14|ml-pg15>
+$ vagrant up <ml-pg10|ml-pg11|ml-pg12|ml-pg13|ml-pg14|ml-pg15|ml-pgmulti>
 ```
 
 ## A multi-version, multi-instance example
@@ -24,17 +24,19 @@ $ vagrant up ml-multi
 
 ## Starting the nodes with PE
 
-You can also test with a Puppet Enterprise server. To do so, add `pe-` for the name when using vagrant:
+You can also test with a Puppet Enterprise server.  For the `pe-server` to run you need to have file `./modules/software/files/puppet-enterprise-2021.7.1-el-8-x86_64/puppet-enterprise-installer`. You can download the Puppet Enterprise binary from the Puppet Website.
+
+Start the VM's, add `pe-` for the name when using vagrant:
 
 ```
-$ vagrant up pe-pgmaster
-$ vagrant up <pe-pg10|pe-pg11|pe-pg12|pe-pg13|pe-pg14|pe-pg15>
+$ vagrant up pe-pgserver
+$ vagrant up <pe-pg10|pe-pg11|pe-pg12|pe-pg13|pe-pg14|pe-pg15|pe-pgmulti>
 ```
 
 ## ordering
 
 You must always use the specified order:
 
-1. pgmaster
+1. pgserver
 2. <pe-pg10|pe-pg11|pe-pg12|pe-pg13|pe-pg14"pe-pg15>
 

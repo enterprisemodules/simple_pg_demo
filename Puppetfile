@@ -26,3 +26,4 @@ mod 'enterprisemodules-pg_secured'
 mod 'role',                                 :local => true
 mod 'profile',                              :local => true
 mod 'em_license',                           :local => true
+mod 'software',                             :local => true

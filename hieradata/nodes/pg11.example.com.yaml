@@ -1,8 +1,8 @@
 ---
 deployment_zone: vagrant
 
-# role: role::postgres::simple_db
-role: role::postgres::secured_db
+role: role::postgres::simple_db
+# role: role::postgres::secured_db
 
 pg_profile::version:    '11'
 

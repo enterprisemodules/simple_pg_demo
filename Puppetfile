@@ -1,7 +1,7 @@
 mod 'puppetlabs-stdlib'
 mod 'puppetlabs-concat'
 mod 'saz-limits'
-mod 'petems-swap_file'
+mod 'petems-swap_file', :git => 'https://github.com/enterprisemodules/petems-swap_file.git'
 mod 'saz-timezone'
 mod 'ipcrm-echo'
 mod 'puppet-augeasproviders_core'

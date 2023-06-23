@@ -6,7 +6,8 @@ else
   # Install R10K. We need this to download the correct set of puppet modules
   #
   echo 'Installing required gems'
-  /opt/puppetlabs/puppet/bin/gem install r10k --no-document > /dev/null # 2>&1
+  /opt/puppetlabs/puppet/bin/gem install r10k specific_install --no-document > /dev/null # 2>&1
+  /opt/puppetlabs/puppet/bin/gem specific_install -l https://github.com/enterprisemodules/puppet-resource_api.git -b fix_issue_314
 
   echo 'Installing required puppet modules'
   cd /vagrant
@@ -29,7 +30,7 @@ else
     echo "Using released versions of modules..."
     PUPPETFILE="Puppetfile"
   fi
-  /opt/puppetlabs/puppet/bin/r10k puppetfile install --puppetfile ${PUPPETFILE} --force > /dev/null # 2>&1
+  # /opt/puppetlabs/puppet/bin/r10k puppetfile install --puppetfile ${PUPPETFILE} --force > /dev/null # 2>&1
 
   #
   # Setup hiera search and backend. We need this to config our systems

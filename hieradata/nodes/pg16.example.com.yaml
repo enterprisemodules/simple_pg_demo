@@ -1,12 +1,12 @@
 ---
 deployment_zone: vagrant
 
-# role: role::postgres::simple_db
-role: role::postgres::secured_db
+role: role::postgres::simple_db
+# role: role::postgres::secured_db
 
-pg_profile::version:      '15'
+pg_profile::version:      '16'
 
-pg_profile::database::cis_controls::instance:             default
+pg_profile::database::cis_controls::instace:             default
 pg_profile::database::cis_controls::product_version:    pg14
 pg_profile::database::cis_controls::doc_version:        'V1.0.0'
 pg_profile::database::cis_controls::skip_list:

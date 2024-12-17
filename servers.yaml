@@ -8,7 +8,7 @@ defaults:
   needs_storage:    false
   additional_hosts:
     pgserver:
-      ip: 192.168.253.10
+      ip: 192.168.56.10
   #
   # Chose one of the boxes you like
   #
@@ -38,62 +38,63 @@ pe-defaults:
 # The settings for the Puppet Enterprise Server
 #
 pe-pgserver:
-  public_ip:        192.168.253.9
+  public_ip:        192.168.56.9
   cpucount:         2
   ram:              3072
   type:             pe-master
   virtualboxorafix: false
   puppet_installer: puppet-enterprise-2021.7.1-el-8-x86_64/puppet-enterprise-installer
 
+192.168.56
 #
 # All masterless nodes
 #
 ml-pg10:
-  public_ip:        '192.168.253.10'
+  public_ip:        '192.168.56.10'
 
 ml-pg11:
-  public_ip:        '192.168.253.11'
+  public_ip:        '192.168.56.11'
 
 ml-pg12:
-  public_ip:        '192.168.253.12'
+  public_ip:        '192.168.56.12'
 
 ml-pg13:
-  public_ip:        '192.168.253.13'
+  public_ip:        '192.168.56.13'
 
 ml-pg14:
-  public_ip:        '192.168.253.14'
+  public_ip:        '192.168.56.14'
 
 ml-pg15:
-  public_ip:        '192.168.253.15'
+  public_ip:        '192.168.56.15'
 
 ml-pg16:
-  public_ip:        '192.168.253.16'
+  public_ip:        '192.168.56.16'
 
 ml-pgmulti:
-  public_ip:        '192.168.253.254'
+  public_ip:        '192.168.56.254'
   ram:              12288
 
 #
 # All Puppet Agent nodes
 #
 pe-pg10:
-  public_ip:        '192.168.253.10'
+  public_ip:        '192.168.56.10'
 
 pe-pg11:
-  public_ip:        '192.168.253.11'
+  public_ip:        '192.168.56.11'
 
 pe-pg12:
-  public_ip:        '192.168.253.12'
+  public_ip:        '192.168.56.12'
 
 pe-pg13:
-  public_ip:        '192.168.253.13'
+  public_ip:        '192.168.56.13'
 
 pe-pg14:
-  public_ip:        '192.168.253.14'
+  public_ip:        '192.168.56.14'
 
 pe-pg15:
-  public_ip:        '192.168.253.15'
+  public_ip:        '192.168.56.15'
 
 pe-pgmulti:
-  public_ip:        '192.168.253.254'
+  public_ip:        '192.168.56.254'
   ram:              12288

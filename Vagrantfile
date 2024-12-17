@@ -26,13 +26,13 @@ VALID_KEYS = [
 
 class FilesNotFoundError < Vagrant::Errors::VagrantError
   def error_message
-    "Missing software files"
+    'Missing software files'
   end
 end
 
 class InvalidDefinition < Vagrant::Errors::VagrantError
   def error_message
-    "Invalid definition in server.yaml"
+    'Invalid definition in server.yaml'
   end
 end
 
@@ -42,6 +42,7 @@ def validate_definitions(content)
     errors << "Node #{key} needs and 'ml-' prefix for masterless or an 'pe-' prefix for Puppset agent" if key[0,3] != 'ml-' && key[0,3] != 'pe-'
     unknown_keys = values.keys - VALID_KEYS
     next if unknown_keys.empty?
+
     errors << "Node #{key} contains unkown entries #{unknown_keys.join(', ')}"
   end
   errors
@@ -53,7 +54,7 @@ def servers
   pe_defaults = content.delete('pe-defaults') || {}
   ml_defaults = content.delete('ml-defaults') || {}
   content.each do |key, values|
-    case key[0,3]
+    case key[0, 3]
     when 'ml-'
       content[key] = defaults.merge(ml_defaults).merge(values)
     when 'pe-'
@@ -62,8 +63,8 @@ def servers
   end
   errors = validate_definitions(content)
   if errors.any?
-    puts "servers.yaml contains following errors:"
-    errors.each {|e| puts "- #{e}\n"}
+    puts 'servers.yaml contains following errors:'
+    errors.each { |e| puts "- #{e}\n" }
     raise InvalidDefinition
   end
   content
@@ -72,36 +73,38 @@ end
 # Return a shell command that ensures that all vagrant hosts are in /etc/hosts
 def hosts_file(vms, ostype)
   if ostype == 'linux'
-    commands = 'sed -i -e /127.0.0.1.*/d /etc/hosts;'
+    commands = 'sed -i -e /127.0.*.*/d /etc/hosts;'
     vms.each do |k, v|
-      hostname =  k[3..-1]
+      hostname = k[3..]
       domain   = v['domain_name']
-      fqdn = "#{hostname}.#{domain}"
-      commands << "grep -q #{fqdn} /etc/hosts || " \
-      "echo #{v['public_ip']} #{fqdn} #{hostname} " \
-      '>> /etc/hosts;' if v['public_ip']
-      if v['additional_hosts']
-        v['additional_hosts'].each do |k, v|
-          fqdn = "#{k}.#{domain}"
-          commands << "grep -q #{fqdn} /etc/hosts || " \
-          "echo #{v['ip']} #{fqdn} #{k} " \
+      fqdn     = "#{hostname}.#{domain}"
+      if v['public_ip']
+        commands << "grep -q #{fqdn} /etc/hosts || " \
+          "echo #{v['public_ip']} #{fqdn} #{hostname} " \
           '>> /etc/hosts;'
-        end
+      end
+      next unless v['additional_hosts']
+
+      v['additional_hosts'].each do |key, value|
+        fqdn = "#{key}.#{domain}"
+        commands << "grep -q #{fqdn} /etc/hosts || " \
+          "echo #{value['ip']} #{fqdn} #{key} " \
+          '>> /etc/hosts;'
       end
     end
   else
     commands = 'puppet apply c:\vagrant\windows_hosts_file.pp'
     win_hosts = ''
     vms.each do |k, v|
-      hostname =  k[3..-1]
+      hostname = k[3..]
       domain   = v['domain_name']
-      fqdn = "#{hostname}.#{domain}"
+      fqdn     = "#{hostname}.#{domain}"
       win_hosts << "host { '#{fqdn}': ip => '#{v['public_ip']}', host_aliases => '#{hostname}' }\n" if v['public_ip']
-      if v['additional_hosts']
-        v['additional_hosts'].each do |k, v|
-          fqdn = "#{k}.#{domain}"
-          win_hosts << "host { '#{fqdn}': ip => '#{v['ip']}', host_aliases => '#{k}' }\n"
-        end
+      next unless v['additional_hosts']
+
+      v['additional_hosts'].each do |key, value|
+        fqdn = "#{key}.#{domain}"
+        win_hosts << "host { '#{fqdn}': ip => '#{value['ip']}', host_aliases => '#{key}' }\n"
       end
     end
     win_hosts = win_hosts.split("\n").uniq.join("\n")
@@ -115,86 +118,105 @@ end
 # Returns a shell command that sets the custom facts
 def facter_overrides(facts, ostype)
   if ostype == 'linux'
-    facter_overrides = facts.map { |key, value| "export FACTER_#{key}=\\\"#{value}\\\"" }.join('\n')
-    'echo -e "' + facter_overrides + '" > /etc/profile.d/facter_overrides.sh'
+    facter_overrides = facts.map { |key, value| "export FACTER_#{key}=\"#{value}\"" }.join('\n')
+    "echo -e '#{facter_overrides}' > /etc/profile.d/facter_overrides.sh"
   else
-    facter_overrides = facts.map { |key, value| ("Write-Host #{key}=#{value}") }.join('`r')
-    'echo "' + facter_overrides + '" > C:\ProgramData\PuppetLabs\facter\facts.d\facter_overrides.ps1'
+    facter_overrides = facts.map { |key, value| "Write-Host #{key}=#{value}" }.join('`r')
+    "echo '#{facter_overrides}' > C:\\ProgramData\\PuppetLabs\\facter\\facts.d\\facter_overrides.ps1"
   end
 end
 
 # Read YAML file with box details
-pe_puppet_user_id  = 495
-pe_puppet_group_id = 496
+pe_puppet_user_id  = 52
+pe_puppet_group_id = 52
 VAGRANT_ROOT       = File.dirname(__FILE__)
 home               = ENV['HOME']
 
-def masterless_setup(config, server, srv, hostname)
+def masterless_setup(server, srv, hostname)
   if srv.vm.communicator == 'ssh'
-    @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'linux'),
-                                run: 'always' } } if server['custom_facts']
-    @provisioners << { shell: { inline: hosts_file(servers, 'linux') } }
-    @provisioners << { shell: { inline: 'bash /vagrant/vm-scripts/install_puppet.sh' } }
-    @provisioners << { shell: { inline: 'bash /vagrant/vm-scripts/setup_puppet.sh' } }
-
-   # if hostname == 'db121'
-   #   @provisioners << { shell: { inline: 'yum -y install gcc' } }
-   # end
-
-    @provisioners << { puppet: { manifests_path: ["vm", "/vagrant/manifests"],
-                                 manifest_file: "site.pp",
-                                 options: "--test" } }
+    if server['custom_facts']
+      @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'linux'),
+                                  name: 'facter_overrides' } }
+    end
+    @provisioners << { shell: { inline: hosts_file(servers, 'linux'),
+                                name: 'hosts_file' } }
+    @provisioners << { shell: { inline: 'bash /vagrant/vm-scripts/install_puppet.sh',
+                                name: 'install_puppet.sh' } }
+    @provisioners << { shell: { inline: 'bash /vagrant/vm-scripts/setup_puppet.sh',
+                                name: 'setup_puppet.sh' } }
+    @provisioners << { puppet: { manifests_path: ['vm', '/vagrant/manifests'],
+                                 manifest_file: 'site.pp',
+                                 options: '--test' } }
   else
-    @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'windows'),
-                                run: 'always' } } if server['custom_facts']
-    @provisioners << { shell: { inline: hosts_file(servers, 'windows') } }
-    @provisioners << { shell: { inline: %Q(Set-ExecutionPolicy Bypass -Scope Process -Force
-                                           cd c:\\vagrant\\vm-scripts
-                                           .\\install_puppet.ps1
-                                           cd c:\\vagrant\\vm-scripts
-                                           .\\setup_puppet.ps1
-                                           iex "& 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet' resource service puppet ensure=stopped") } }
-    @provisioners << { puppet: { manifests_path: ["vm", "c:\\vagrant\\manifests"],
-                                 manifest_file: "site.pp",
-                                 options: "--test" } }
+    @provisioners << { shell: { inline: %(Set-ExecutionPolicy Bypass -Scope Process -Force
+                                          cd c:\\vagrant\\vm-scripts
+                                          .\\install_puppet.ps1
+                                          cd c:\\vagrant\\vm-scripts
+                                          .\\setup_puppet.ps1
+                                          iex "& 'C:\\Program Files\\Puppet Labs\\Puppet\\bin\\puppet' resource service puppet ensure=stopped"),
+                                name: 'install and setup puppet' } }
+    @provisioners << { shell: { inline: hosts_file(servers, 'windows'),
+                                name: 'hosts_file' } }
+    if server['custom_facts']
+      @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'windows'),
+                                  name: 'facter_overrides' } }
+    end
+    @provisioners << { shell: { inline: %(Set-ExecutionPolicy Bypass -Scope Process -Force
+                                          cd c:\\vagrant\\vm-scripts
+                                          .\\run_puppet.ps1),
+                                name: 'run puppet' } }
   end
 end
 
-def puppet_master_setup(config, srv, server, puppet_installer, pe_puppet_user_id, pe_puppet_group_id, hostname)
+def puppet_master_setup(srv, server, puppet_installer, pe_puppet_user_id, pe_puppet_group_id, hostname)
   srv.vm.synced_folder '.', '/vagrant', owner: pe_puppet_user_id, group: pe_puppet_group_id
 
-  @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'linux'),
-                              run: 'always' } } if server['custom_facts']
-  @provisioners << { shell: { inline: hosts_file(servers, 'linux') } }
-  @provisioners << { shell: { inline: "bash /vagrant/vm-scripts/install_puppet_server.sh #{puppet_installer} #{server['domain_name']}" } }
+  if server['custom_facts']
+    @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'linux'),
+                                name: 'facter_overrides' } }
+  end
+  @provisioners << { shell: { inline: hosts_file(servers, 'linux'),
+                              name: 'hosts_file' } }
+  @provisioners << { shell: { inline: "bash /vagrant/vm-scripts/install_puppet_server.sh #{puppet_installer} #{server['domain_name']}",
+                              name: 'install_puppet_server.sh' } }
   @provisioners << { puppet_server: { puppet_server: "#{server['puppet_master']}.#{server['domain_name']}",
-                                      options: "--test" } }
+                                      options: '--test' } }
 end
 
-def puppet_agent_setup(config, server, srv, hostname)
+def puppet_agent_setup(server, srv, hostname)
   if srv.vm.communicator == 'ssh'
-    @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'linux'),
-                                run: 'always' } } if server['custom_facts']
-    @provisioners << { shell: { inline: hosts_file(servers, 'linux') } }
-    @provisioners << { shell: { inline: "bash /vagrant/vm-scripts/install_puppet_agent.sh #{server['puppet_master']}.#{server['domain_name']}" } }
-    @provisioners << { shell: { inline: 'systemctl stop puppet; pkill -9 -f "puppet.*agent.*"; true' } }
+    if server['custom_facts']
+      @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'linux'),
+                                  name: 'facter_overrides' } }
+    end
+    @provisioners << { shell: { inline: hosts_file(servers, 'linux'),
+                                name: 'hosts_file' } }
+    @provisioners << { shell: { inline: "bash /vagrant/vm-scripts/install_puppet_agent.sh #{server['puppet_master']}.#{server['domain_name']}",
+                                name: 'install_puppet_agent.sh' } }
+    @provisioners << { shell: { inline: 'systemctl stop puppet; pkill -9 -f "puppet.*agent.*"; true',
+                                name: 'stop puppet' } }
     @provisioners << { puppet_server: { puppet_server: "#{server['puppet_master']}.#{server['domain_name']}",
                                         puppet_node: "#{hostname}.#{server['domain_name']}",
-                                        options: "--test" } }
-    @provisioners << { shell: { inline: 'systemctl start puppet' } }
+                                        options: '--test' } }
+    @provisioners << { shell: { inline: 'systemctl start puppet',
+                                name: 'start puppet' } }
   else
-    @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'windows'),
-                                run: 'always' } } if server['custom_facts']
-    @provisioners << { shell: { inline: hosts_file(servers, 'windows') } }
-    @provisioners << { shell: { inline: %Q(Set-ExecutionPolicy Bypass -Scope Process -Force
-                                           [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
-                                           $webClient = New-Object System.Net.WebClient
-                                           $webClient.DownloadFile('https://#{server['puppet_master']}.#{server['domain_name']}:8140/packages/current/install.ps1', 'install.ps1')
-                                           .\\install.ps1
-                                           iex 'puppet resource service puppet ensure=stopped') } }
+    @provisioners << { shell: { inline: %(Set-ExecutionPolicy Bypass -Scope Process -Force
+                                          [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+                                          $webClient = New-Object System.Net.WebClient
+                                          $webClient.DownloadFile('https://#{server['puppet_master']}.#{server['domain_name']}:8140/packages/current/install.ps1', 'install.ps1')
+                                          .\\install.ps1
+                                          iex 'puppet resource service puppet ensure=stopped'),
+                                name: 'install puppet agent' } }
+    if server['custom_facts']
+      @provisioners << { shell: { inline: facter_overrides(server['custom_facts'], 'windows'),
+                                  name: 'facter_overrides' } }
+    end
+    @provisioners << { shell: { inline: hosts_file(servers, 'windows'),
+                                name: 'hosts_file' } }
     @provisioners << { puppet_server: { puppet_server: "#{server['puppet_master']}.#{server['domain_name']}",
                                         puppet_node: "#{hostname}.#{server['domain_name']}",
-                                        options: "--test" } }
+                                        options: '--test' } }
   end
 end
 
@@ -213,7 +235,7 @@ end
 def configure_disks(vb, server, hostname, name)
   vminfo = vm_info(name)
   disks = server['disks'] || {}
-  unless vminfo =~ /Storage Controller Name \(1\): *SATA Controller/
+  unless vminfo =~ /Storage Controller Name \(1\): *SATA Controller/ || vminfo =~ /#\d+: 'SATA Controller'/
     # puts "Attaching SATA Controller"
     vb.customize [
       'storagectl', :id,
@@ -221,8 +243,6 @@ def configure_disks(vb, server, hostname, name)
       '--add', 'sata',
       '--portcount', disks.size
     ]
-  # else
-  #   puts 'SATA Controller already attached'
   end
 
   disks.each_with_index do |disk, i|
@@ -230,11 +250,7 @@ def configure_disks(vb, server, hostname, name)
     disk_size = disk.last['size']
     disk_uuid = disk.last['uuid']
     real_uuid = "00000000-0000-0000-0000-#{disk_uuid.rjust(12,'0')}"
-    if server['cluster']
-      disk_filename = File.join(VAGRANT_ROOT, "#{disk_name}_#{server['cluster']}.vdi")
-    else
-      disk_filename = File.join(VAGRANT_ROOT, "#{disk_name}.vdi")
-    end
+    disk_filename = server['cluster'] ? File.join(VAGRANT_ROOT, "#{disk_name}_#{server['cluster']}.vdi") : File.join(VAGRANT_ROOT, "#{disk_name}.vdi")
 
     if File.file?(disk_filename)
       # puts "Disk #{disk_filename} already created"
@@ -315,10 +331,9 @@ end
 
 # Raises missing plugin error
 def plugin_check(plugin_name)
-  unless Vagrant.has_plugin?(plugin_name)
-    raise "#{plugin_name} is not installed, please run: vagrant plugin " \
-          "install #{plugin_name}"
-  end
+  return if Vagrant.has_plugin?(plugin_name)
+
+  raise "#{plugin_name} is not installed, please run: vagrant plugin install #{plugin_name}"
 end
 
 # Check if all required software files from servers.yaml are present in repo.
@@ -333,16 +348,16 @@ def local_software_file_check(srv, file_names)
           env.ui.error "Missing software file: #{file_name}"
         end
       end
-      if not files_found
-          env.ui.error "Please add missing file(s) to the: ./modules/software/files/ directory."
-          raise FilesNotFoundError
+      unless files_found
+        env.ui.error 'Please add missing file(s) to the: ./modules/software/files/ directory.'
+        raise FilesNotFoundError
       end
     end
   end
 end
 
 def vbox_manage?
-  @vbox_manage ||= ! `which VBoxManage`.chomp.empty?
+  @vbox_manage ||= !`which VBoxManage`.chomp.empty?
 end
 
 def vm_boxes
@@ -382,7 +397,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #
       # Perform plugin checks before main setup
       #
-      server['required_plugins'].each { |name| plugin_check(name) } if server['required_plugins']
+      server['required_plugins']&.each { |plugin| plugin_check(plugin) }
       #
       # Perform software checks before main setup
       #
@@ -393,22 +408,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           if Gem.win_platform?
             trigger.info = "DHCP fix process doesn't work on Windows..."
           else
-            trigger.info = "Starting DHCP fix process..."
-            trigger.run = {inline: "sh -c \"until vboxmanage guestcontrol #{name} run \"/usr/bin/sudo\" --username vagrant --password vagrant --verbose --wait-stdout dhclient; do c=$((${c:-1}+1)); test $c -gt 50 && exit; sleep 20; done > /dev/null 2>&1 &\""}
+            trigger.info = 'Starting DHCP fix process...'
+            trigger.run = { inline: "sh -c \"until vboxmanage guestcontrol #{name} run \"/usr/bin/sudo\" --username vagrant --password vagrant --verbose --wait-stdout dhclient; do c=$((${c:-1}+1)); test $c -gt 50 && exit; sleep 20; done > /dev/null 2>&1 &\"" }
           end
         end
       end
 
       srv.vm.communicator = server['protocol'] || 'ssh'
       srv.vm.box          = server['box']
-      hostname            = name[3..-1]
+      hostname            = name[3..]
 
       if srv.vm.communicator == 'ssh'
         srv.vm.hostname = "#{hostname}.#{server['domain_name']}"
         config.ssh.forward_agent = true
         config.ssh.forward_x11 = true
       else
-        srv.vm.hostname = "#{hostname}"
+        srv.vm.hostname = hostname.to_s
         config.winrm.ssl_peer_verification = false
         config.winrm.retry_delay = 60
         config.winrm.username = 'Administrator'
@@ -431,20 +446,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #
       case server['type']
       when 'masterless'
-        masterless_setup(config, server, srv, hostname)
+        masterless_setup(server, srv, hostname)
       when 'pe-master'
-        puppet_master_setup(config, srv, server, puppet_installer, pe_puppet_user_id, pe_puppet_group_id, hostname)
+        puppet_master_setup(srv, server, puppet_installer, pe_puppet_user_id, pe_puppet_group_id, hostname)
       when 'pe-agent'
-        puppet_agent_setup(config, server, srv, hostname)
-      begin
-        "#{server['type']} is invalid."
-      rescue => exception
+        puppet_agent_setup(server, srv, hostname)
+        begin
+          "#{server['type']} is invalid."
+        rescue => exception
 
-      else
+        else
 
-      ensure
+          ensure
 
-      end
+        end
       end
 
       srv.vm.provider :virtualbox do |vb|
@@ -454,8 +469,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.name = name
         # Prevent vagrant from setting up dns proxy, and thus changing /etc/resolv.conf
         vb.auto_nat_dns_proxy = false
-        vb.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
-        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "off"]
+        vb.customize ['modifyvm', :id, '--natdnsproxy1', 'off']
+        vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'off']
 
         # Setup config fixes for Oracle product
         virtualboxorafix(vb) if server['virtualboxorafix']
@@ -466,7 +481,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       @provisioners.each do |provisioner|
         provisioner.each do |type, options|
-          srv.vm.provision type, options
+          srv.vm.provision type, **options.transform_keys(&:to_sym)
         end
       end
     end

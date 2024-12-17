@@ -45,7 +45,6 @@ pe-pgserver:
   virtualboxorafix: false
   puppet_installer: puppet-enterprise-2021.7.1-el-8-x86_64/puppet-enterprise-installer
 
-192.168.56
 #
 # All masterless nodes
 #
